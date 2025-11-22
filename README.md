@@ -37,21 +37,25 @@
 
 **Download scripts with curl / Descargar los scripts con curl**
 
-- **English:** If you want to fetch the scripts directly with `sudo` from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `sudo`, install it manually first:
+- **English:** If you want to fetch the scripts directly from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `sudo` and you want to use `sudo` as a non-root user, install `sudo` first (you must be root to install packages):
 
-
-If you don't have `sudo` installed, run this manually before the downloads:
-
+As root, to install `sudo` and add your user to the `sudo` group (replace `<your-user>`):
 
 ```bash
-apt update && sudo apt install -y sudo ca-certificates
+apt update && apt install -y sudo ca-certificates
+usermod -aG sudo <your-user>
+# then log out and log in again for group membership to take effect
 ```
 
-- **English:** If you want to fetch the scripts directly with `curl` from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `curl`, install it manually first:
+If you prefer to run commands as root (do not use `sudo`), skip the `sudo` install and run the following as root when needed.
 
+If you don't have `curl`, install it (as root or using `sudo`):
 
-If you don't have `curl` installed, run this manually before the downloads:
-
+As root:
+```bash
+apt update && apt install -y curl ca-certificates
+```
+Or as non-root with `sudo`:
 ```bash
 sudo apt update && sudo apt install -y curl ca-certificates
 ```
@@ -79,16 +83,25 @@ chmod +x upgrade_12_to_13.sh
 
 Verify the downloaded script and run it as root. The scripts include a built-in check that ensures you are on the correct Debian release before attempting the upgrade; they will abort if you try to jump versions (for example, running the 12→13 script on a Debian 10 host).
 
-- **Español:** Si prefieres descargar los scripts con `curl` (usando las URLs raw de GitHub), ejecuta el comando correspondiente más abajo. Si tu sistema no tiene `curl`, instálalo manualmente primero:
+- **Español:** Si prefieres descargar los scripts desde este repositorio (URLs raw de GitHub), ejecuta el comando correspondiente más abajo. Si tu sistema no tiene `sudo` y quieres usar `sudo` como usuario normal, instala `sudo` primero (debes ser root para instalar paquetes):
 
-Si tu sistema no tiene `sudo`, instálalo manualmente antes de las descargas:
+Como root, para instalar `sudo` y añadir tu usuario al grupo `sudo` (sustituye `<tu-usuario>`):
 
 ```bash
-apt update && sudo apt install -y sudo ca-certificates
+apt update && apt install -y sudo ca-certificates
+usermod -aG sudo <tu-usuario>
+# luego cierra sesión y vuelve a iniciarla para que los grupos se actualicen
 ```
 
-Si tu sistema no tiene `curl`, instálalo manualmente antes de las descargas:
+Si prefieres ejecutar comandos como root (no usar `sudo`), omite la instalación de `sudo` y ejecuta los comandos como root cuando sea necesario.
 
+Si no tienes `curl`, instálalo (como root o usando `sudo`):
+
+Como root:
+```bash
+apt update && apt install -y curl ca-certificates
+```
+O como usuario normal con `sudo`:
 ```bash
 sudo apt update && sudo apt install -y curl ca-certificates
 ```
