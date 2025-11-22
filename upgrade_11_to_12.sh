@@ -10,6 +10,7 @@ NEW_NAME="bookworm"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="/root/upgrade-b${OLD_NAME}-to-${NEW_NAME}-${TIMESTAMP}"
 ASSUME_YES=false
+FORCE=false
 APPLY_UPGRADE=false
 DO_INSTALL_DOCKER=false
 DO_INSTALL_VMWARE=false
@@ -40,7 +41,23 @@ get_current_codename(){
 }
 
 CURRENT_CODENAME=$(get_current_codename)
-if [[ "$CURRENT_CODENAME" != "$OLD_NAME" ]]; then
+# Minimal error helper (needed early)
+err(){ echo "[!] $*" >&2; }
+if [[ "$CURRENT_CODENAME" == "$OLD_NAME" ]]; then
+  : # expected, proceed
+elif [[ "$CURRENT_CODENAME" == "$NEW_NAME" ]]; then
+  # System already reports the target release; allow continuing only with --force, --yes or explicit confirm
+  if $FORCE || $ASSUME_YES; then
+    echo "[!] System reports '$NEW_NAME' but proceeding because --force or --yes was used."
+  else
+    if ! ( read -t 0 </dev/tty 2>/dev/null && echo >/dev/tty ); then
+      err "System already reports '$NEW_NAME'. Use --force to proceed non-interactively or run locally and confirm to continue. Aborting."
+      exit 4
+    fi
+    read -r -p "System already reports '$NEW_NAME'. Proceed anyway to run upgrade steps? [y/N]: " ans </dev/tty
+    case "$ans" in [Yy]|[Yy][Ee][Ss]) ;; *) err "Aborting."; exit 4 ;; esac
+  fi
+else
   err "This script upgrades from '$OLD_NAME' to '$NEW_NAME' but system reports '$CURRENT_CODENAME'. Aborting to avoid unsupported jumps."
   exit 4
 fi
@@ -57,6 +74,7 @@ while [[ ${#} -gt 0 ]]; do
     --install-docker) DO_INSTALL_DOCKER=true; shift ;;
     --install-vmware) DO_INSTALL_VMWARE=true; shift ;;
     --yes|-y) ASSUME_YES=true; shift ;;
+    --force) FORCE=true; shift ;;
     --help|-h) usage; exit 0 ;;
     *) echo "Unknown option: $1"; usage; exit 1 ;;
   esac
@@ -71,7 +89,19 @@ chmod 700 "$BACKUP_DIR"
 
 log(){ echo "[+] $*"; }
 err(){ echo "[!] $*" >&2; }
-confirm(){ if $ASSUME_YES; then return 0; fi; read -r -p "$1 [y/N]: " ans; case "$ans" in [Yy]|[Yy][Ee][Ss]) return 0 ;; *) return 1 ;; esac }
+confirm(){
+  if $ASSUME_YES; then return 0; fi
+  if [ -t 0 ]; then
+    read -r -p "$1 [y/N]: " ans
+  else
+    if [ -e /dev/tty ]; then
+      read -r -p "$1 [y/N]: " ans </dev/tty
+    else
+      return 1
+    fi
+  fi
+  case "$ans" in [Yy]|[Yy][Ee][Ss]) return 0 ;; *) return 1 ;; esac
+}
 
 log "Backup dir: $BACKUP_DIR"
 log "Backing up /etc"
