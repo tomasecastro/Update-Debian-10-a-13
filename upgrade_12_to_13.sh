@@ -40,6 +40,8 @@ get_current_codename(){
 }
 
 CURRENT_CODENAME=$(get_current_codename)
+# Minimal error helper (needed early, before full function definitions)
+err(){ echo "[!] $*" >&2; }
 if [[ "$CURRENT_CODENAME" != "$OLD_NAME" ]]; then
   err "This script upgrades from '$OLD_NAME' to '$NEW_NAME' but system reports '$CURRENT_CODENAME'. Aborting to avoid unsupported jumps."
   exit 4
@@ -71,7 +73,24 @@ chmod 700 "$BACKUP_DIR"
 
 log(){ echo "[+] $*"; }
 err(){ echo "[!] $*" >&2; }
-confirm(){ if $ASSUME_YES; then return 0; fi; read -r -p "$1 [y/N]: " ans; case "$ans" in [Yy]|[Yy][Ee][Ss]) return 0 ;; *) return 1 ;; esac }
+confirm(){
+  if $ASSUME_YES; then return 0; fi
+  # If stdin is a terminal, read from it. If not (e.g. when piping the script), try /dev/tty.
+  if [ -t 0 ]; then
+    read -r -p "$1 [y/N]: " ans
+  else
+    if [ -e /dev/tty ]; then
+      read -r -p "$1 [y/N]: " ans </dev/tty
+    else
+      # No way to ask interactively; default to 'no'
+      return 1
+    fi
+  fi
+  case "$ans" in
+    [Yy]|[Yy][Ee][Ss]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 log "Backup dir: $BACKUP_DIR"
 log "Backing up /etc"
