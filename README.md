@@ -37,7 +37,18 @@
 
 **Download scripts with curl / Descargar los scripts con curl**
 
+- **English:** If you want to fetch the scripts directly with `sudo` from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `sudo`, install it manually first:
+
+
+If you don't have `sudo` installed, run this manually before the downloads:
+
+
+```bash
+sudo apt update && sudo apt install -y sudo ca-certificates
+```
+
 - **English:** If you want to fetch the scripts directly with `curl` from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `curl`, install it manually first:
+
 
 If you don't have `curl` installed, run this manually before the downloads:
 
