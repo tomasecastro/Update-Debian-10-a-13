@@ -1,5 +1,31 @@
 **Project README**
 
+**Disclaimer / Exoneration of Liability (Technical)**
+
+- **English (Technical):** These scripts are provided "as-is" to automate Debian release upgrades. They perform system-level operations (editing apt sources, package upgrades, service restarts, and optional package installs) that can cause data loss, downtime, or configuration changes. Use them only after you have:
+  - reviewed and understood the script contents,
+  - tested the procedure in a non-production environment, and
+  - created full backups (system image or snapshots, `/etc`, and package selections).
+
+  You execute these scripts at your own risk. The author and contributors expressly disclaim liability for any damages, data loss, or service interruption resulting from their use. There is no warranty—express or implied—of fitness for a particular purpose or merchantability. If you require guaranteed outcomes, perform the upgrade using your standard maintenance procedures or consult a qualified system administrator.
+
+  Technical notes:
+  - The scripts include a release-codename validation to reduce the risk of jumping releases, but they cannot cover every custom repository or third-party packaging scenario.
+  - Review and, if necessary, adapt entries in `/etc/apt/sources.list` and `/etc/apt/sources.list.d/` for vendor repositories (Docker, etc.), adding `signed-by` keyrings when required.
+  - Rollbacks are not automated. Ensure snapshots or reliable backups (LVM, filesystem or VM snapshots, or full disk images) are available before proceeding.
+
+- **Español (Técnico):** Estos scripts se proporcionan "tal cual" para automatizar actualizaciones de release de Debian. Ejecutan operaciones a nivel de sistema (editar fuentes de apt, actualizar paquetes, reiniciar servicios e instalaciones opcionales) que pueden provocar pérdida de datos, indisponibilidad o cambios de configuración. Úsalos sólo después de:
+  - revisar y comprender el contenido de los scripts,
+  - probar el procedimiento en un entorno no productivo, y
+  - realizar copias de seguridad completas (imagen/snapshots del sistema, `/etc` y selección de paquetes).
+
+  Ejecutas estos scripts bajo tu propia responsabilidad. El autor y los colaboradores renuncian expresamente a cualquier responsabilidad por daños, pérdida de datos o interrupciones de servicio derivadas de su uso. No existe garantía—explícita ni implícita—sobre idoneidad para un propósito concreto o comerciabilidad. Si necesitas resultados garantizados, realiza la actualización mediante tus procedimientos de mantenimiento habituales o consulta a un administrador de sistemas cualificado.
+
+  Notas técnicas:
+  - Los scripts incluyen una validación del nombre de la release para reducir el riesgo de saltos de versión, pero no pueden cubrir todos los escenarios con repositorios personalizados o paquetes de terceros.
+  - Revisa y adapta, si es necesario, las entradas en `/etc/apt/sources.list` y `/etc/apt/sources.list.d/` para repositorios de proveedores (Docker, etc.), añadiendo keyrings `signed-by` cuando correspondan.
+  - No hay un mecanismo de reversión automatizado. Asegúrate de disponer de snapshots o copias fiables (LVM, snapshots de sistema de archivos, snapshots de VM o imágenes completas) antes de proceder.
+
 **Overview / Resumen**
 - **English:** This repository contains shell scripts to upgrade Debian systems step-by-step from 10 (Buster) → 11 (Bullseye) → 12 (Bookworm) → 13 (Trixie). It also includes notes about a recent fix applied to the scripts.
 - **Español:** Este repositorio contiene scripts shell para actualizar Debian paso a paso de 10 (Buster) → 11 (Bullseye) → 12 (Bookworm) → 13 (Trixie). También incluye notas sobre una corrección reciente aplicada a los scripts.
