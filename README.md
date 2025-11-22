@@ -70,6 +70,12 @@ Verify the downloaded script and run it as root. The scripts include a built-in 
 
 - **Español:** Si prefieres descargar los scripts con `curl` (usando las URLs raw de GitHub), ejecuta el comando correspondiente más abajo. Si tu sistema no tiene `curl`, instálalo manualmente primero:
 
+Si tu sistema no tiene `sudo`, instálalo manualmente antes de las descargas:
+
+```bash
+sudo apt update && sudo apt install -y sudo ca-certificates
+```
+
 Si tu sistema no tiene `curl`, instálalo manualmente antes de las descargas:
 
 ```bash
