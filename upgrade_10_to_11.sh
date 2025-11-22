@@ -44,26 +44,6 @@ get_current_codename(){
 CURRENT_CODENAME=$(get_current_codename)
 # Minimal error helper (needed early)
 err(){ echo "[!] $*" >&2; }
-SKIP_SOURCE_CHANGE=false
-if [[ "$CURRENT_CODENAME" == "$OLD_NAME" ]]; then
-  : # expected, proceed
-elif [[ "$CURRENT_CODENAME" == "$NEW_NAME" ]]; then
-  # System already reports the target release; allow continuing only with --force, --yes or explicit confirm
-  if $FORCE || $ASSUME_YES; then
-    echo "[!] System reports '$NEW_NAME' but proceeding because --force or --yes was used. Will not change apt sources, only update/upgrade the current release."
-    SKIP_SOURCE_CHANGE=true
-  else
-    if ! ( read -t 0 </dev/tty 2>/dev/null && echo >/dev/tty ); then
-      err "System already reports '$NEW_NAME'. Use --force to proceed non-interactively or run locally and confirm to continue. Aborting."
-      exit 4
-    fi
-    read -r -p "System already reports '$NEW_NAME'. Proceed anyway to run upgrade steps (no sources will be changed)? [y/N]: " ans </dev/tty
-    case "$ans" in [Yy]|[Yy][Ee][Ss]) SKIP_SOURCE_CHANGE=true ;; *) err "Aborting."; exit 4 ;; esac
-  fi
-else
-  err "This script upgrades from '$OLD_NAME' to '$NEW_NAME' but system reports '$CURRENT_CODENAME'. Aborting to avoid unsupported jumps."
-  exit 4
-fi
 
 usage(){
   cat <<'EOF'
@@ -90,6 +70,35 @@ done
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root (sudo)" >&2; exit 2
+fi
+
+# Decide how to handle the current codename *after* parsing flags so we can
+# react to --apply-upgrade, --yes and --force appropriately.
+SKIP_SOURCE_CHANGE=false
+AUTO_PROCEED_ON_SAME=false
+if [[ "$CURRENT_CODENAME" == "$OLD_NAME" ]]; then
+  : # expected, proceed normally
+elif [[ "$CURRENT_CODENAME" == "$NEW_NAME" ]]; then
+  SKIP_SOURCE_CHANGE=true
+  if $APPLY_UPGRADE || $FORCE || $ASSUME_YES; then
+    echo "[!] System reports '$NEW_NAME' — will perform update/upgrade on ${NEW_NAME} (no sources changes)."
+    AUTO_PROCEED_ON_SAME=true
+  else
+    if [ -t 0 ] || [ -e /dev/tty ]; then
+      if [ -e /dev/tty ]; then
+        read -r -p "System already reports '$NEW_NAME'. Proceed to update/upgrade ${NEW_NAME} (no sources changes)? [y/N]: " ans </dev/tty
+      else
+        read -r -p "System already reports '$NEW_NAME'. Proceed to update/upgrade ${NEW_NAME} (no sources changes)? [y/N]: " ans
+      fi
+      case "$ans" in [Yy]|[Yy][Ee][Ss]) AUTO_PROCEED_ON_SAME=true ;; *) err "Aborting."; exit 4 ;; esac
+    else
+      err "System already reports '$NEW_NAME' and no interactive terminal is available. Use --force or --yes with --apply-upgrade to proceed non-interactively. Aborting."
+      exit 4
+    fi
+  fi
+else
+  err "This script upgrades from '$OLD_NAME' to '$NEW_NAME' but system reports '$CURRENT_CODENAME'. Aborting to avoid unsupported jumps."
+  exit 4
 fi
 
 mkdir -p "$BACKUP_DIR"
@@ -138,7 +147,11 @@ if ! $APPLY_UPGRADE; then
 fi
 
 if $SKIP_SOURCE_CHANGE; then
-  if ! confirm "Proceed to perform apt update && upgrade on ${NEW_NAME} (no sources will be changed)?"; then echo "Cancelled"; exit 0; fi
+  if ! $AUTO_PROCEED_ON_SAME; then
+    if ! confirm "Proceed to perform apt update && upgrade on ${NEW_NAME} (no sources will be changed)?"; then echo "Cancelled"; exit 0; fi
+  else
+    log "Auto-proceeding to perform apt update && upgrade on ${NEW_NAME} (no sources will be changed)"
+  fi
 else
   if ! confirm "Proceed to change apt sources from ${OLD_NAME} to ${NEW_NAME} and upgrade?"; then echo "Cancelled"; exit 0; fi
 fi
