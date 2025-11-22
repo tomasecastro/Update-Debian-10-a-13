@@ -44,7 +44,7 @@ If you don't have `sudo` installed, run this manually before the downloads:
 
 
 ```bash
-sudo apt update && sudo apt install -y sudo ca-certificates
+apt update && sudo apt install -y sudo ca-certificates
 ```
 
 - **English:** If you want to fetch the scripts directly with `curl` from this repository (raw GitHub URLs), run the appropriate command below. If your system does not have `curl`, install it manually first:
@@ -84,7 +84,7 @@ Verify the downloaded script and run it as root. The scripts include a built-in 
 Si tu sistema no tiene `sudo`, instálalo manualmente antes de las descargas:
 
 ```bash
-sudo apt update && sudo apt install -y sudo ca-certificates
+apt update && sudo apt install -y sudo ca-certificates
 ```
 
 Si tu sistema no tiene `curl`, instálalo manualmente antes de las descargas:
