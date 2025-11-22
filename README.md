@@ -40,10 +40,21 @@
 - **English:** If you want to fetch the scripts directly with `curl` from this repository (example using GitHub raw URL), replace `<USER>` and `<REPO>` and run:
 
 ```bash
-curl -fsSL -o upgrade_10_to_11.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_10_to_11.sh
-curl -fsSL -o upgrade_11_to_12.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_11_to_12.sh
-curl -fsSL -o upgrade_12_to_13.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_12_to_13.sh
-chmod +x upgrade_10_to_11.sh upgrade_11_to_12.sh upgrade_12_to_13.sh
+# Download only the 10 -> 11 upgrade script
+curl -fsSL -o upgrade_10_to_11.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_10_to_11.sh
+chmod +x upgrade_10_to_11.sh
+```
+
+```bash
+# Download only the 11 -> 12 upgrade script
+curl -fsSL -o upgrade_11_to_12.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_11_to_12.sh
+chmod +x upgrade_11_to_12.sh
+```
+
+```bash
+# Download only the 12 -> 13 upgrade script
+curl -fsSL -o upgrade_12_to_13.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_12_to_13.sh
+chmod +x upgrade_12_to_13.sh
 ```
 
 Verify the downloaded script and run it as root. The scripts include a built-in check that ensures you are on the correct Debian release before attempting the upgrade, so they will abort if you try to jump versions (for example, running the 12→13 script on a Debian 10 host).
@@ -51,10 +62,21 @@ Verify the downloaded script and run it as root. The scripts include a built-in 
 - **Español:** Si prefieres descargar los scripts con `curl` (ejemplo usando la URL raw de GitHub), sustituye `<USER>` y `<REPO>` y ejecuta:
 
 ```bash
-curl -fsSL -o upgrade_10_to_11.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_10_to_11.sh
-curl -fsSL -o upgrade_11_to_12.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_11_to_12.sh
-curl -fsSL -o upgrade_12_to_13.sh https://raw.githubusercontent.com/<USER>/<REPO>/main/upgrade_12_to_13.sh
-chmod +x upgrade_10_to_11.sh upgrade_11_to_12.sh upgrade_12_to_13.sh
+# Descargar solo el script 10 -> 11
+curl -fsSL -o upgrade_10_to_11.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_10_to_11.sh
+chmod +x upgrade_10_to_11.sh
+```
+
+```bash
+# Descargar solo el script 11 -> 12
+curl -fsSL -o upgrade_11_to_12.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_11_to_12.sh
+chmod +x upgrade_11_to_12.sh
+```
+
+```bash
+# Descargar solo el script 12 -> 13
+curl -fsSL -o upgrade_12_to_13.sh https://raw.githubusercontent.com/tomasecastro/Update-Debian-10-a-13/main/upgrade_12_to_13.sh
+chmod +x upgrade_12_to_13.sh
 ```
 
 Comprueba el script descargado y ejecútalo como root. Los scripts incluyen una comprobación que valida la release actual de Debian antes de continuar y abortarán si intentas saltar versiones (por ejemplo, ejecutar el script 12→13 en un equipo con Debian 10).
