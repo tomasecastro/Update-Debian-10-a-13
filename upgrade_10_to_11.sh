@@ -44,19 +44,21 @@ get_current_codename(){
 CURRENT_CODENAME=$(get_current_codename)
 # Minimal error helper (needed early)
 err(){ echo "[!] $*" >&2; }
+SKIP_SOURCE_CHANGE=false
 if [[ "$CURRENT_CODENAME" == "$OLD_NAME" ]]; then
   : # expected, proceed
 elif [[ "$CURRENT_CODENAME" == "$NEW_NAME" ]]; then
   # System already reports the target release; allow continuing only with --force, --yes or explicit confirm
   if $FORCE || $ASSUME_YES; then
-    echo "[!] System reports '$NEW_NAME' but proceeding because --force or --yes was used."
+    echo "[!] System reports '$NEW_NAME' but proceeding because --force or --yes was used. Will not change apt sources, only update/upgrade the current release."
+    SKIP_SOURCE_CHANGE=true
   else
     if ! ( read -t 0 </dev/tty 2>/dev/null && echo >/dev/tty ); then
       err "System already reports '$NEW_NAME'. Use --force to proceed non-interactively or run locally and confirm to continue. Aborting."
       exit 4
     fi
-    read -r -p "System already reports '$NEW_NAME'. Proceed anyway to run upgrade steps? [y/N]: " ans </dev/tty
-    case "$ans" in [Yy]|[Yy][Ee][Ss]) ;; *) err "Aborting."; exit 4 ;; esac
+    read -r -p "System already reports '$NEW_NAME'. Proceed anyway to run upgrade steps (no sources will be changed)? [y/N]: " ans </dev/tty
+    case "$ans" in [Yy]|[Yy][Ee][Ss]) SKIP_SOURCE_CHANGE=true ;; *) err "Aborting."; exit 4 ;; esac
   fi
 else
   err "This script upgrades from '$OLD_NAME' to '$NEW_NAME' but system reports '$CURRENT_CODENAME'. Aborting to avoid unsupported jumps."
@@ -135,14 +137,22 @@ if ! $APPLY_UPGRADE; then
   echo "Backups done. Re-run with --apply-upgrade to perform sources edit and upgrade."; exit 0
 fi
 
-if ! confirm "Proceed to change apt sources from ${OLD_NAME} to ${NEW_NAME} and upgrade?"; then echo "Cancelled"; exit 0; fi
+if $SKIP_SOURCE_CHANGE; then
+  if ! confirm "Proceed to perform apt update && upgrade on ${NEW_NAME} (no sources will be changed)?"; then echo "Cancelled"; exit 0; fi
+else
+  if ! confirm "Proceed to change apt sources from ${OLD_NAME} to ${NEW_NAME} and upgrade?"; then echo "Cancelled"; exit 0; fi
+fi
 
 cp -a /etc/apt/sources.list "$BACKUP_DIR/sources.list.bak"
 cp -a /etc/apt/sources.list.d "$BACKUP_DIR/sources.list.d.bak" || true
 
-log "Replacing '$OLD_NAME' with '$NEW_NAME' in apt sources"
-sed -i "s/${OLD_NAME}/${NEW_NAME}/g" /etc/apt/sources.list || true
-find /etc/apt/sources.list.d/ -type f -exec sed -i "s/${OLD_NAME}/${NEW_NAME}/g" {} \; || true
+if ! $SKIP_SOURCE_CHANGE; then
+  log "Replacing '$OLD_NAME' with '$NEW_NAME' in apt sources"
+  sed -i "s/${OLD_NAME}/${NEW_NAME}/g" /etc/apt/sources.list || true
+  find /etc/apt/sources.list.d/ -type f -exec sed -i "s/${OLD_NAME}/${NEW_NAME}/g" {} \; || true
+else
+  log "Skipping apt sources changes because system already reports '$NEW_NAME'"
+fi
 
 log "Updating indexes"
 # Normalize security repository entries which sometimes use 'suite/updates' format
